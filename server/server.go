@@ -17,6 +17,8 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	bot.CurrentMSG = body.Message
+
 	if body.Message.Text[0] == '/' {
 		command := bot.GetCMD(body.Message.Text)
 		response := command.Handler(bot.GetParams(body.Message.Text))

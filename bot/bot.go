@@ -1,6 +1,11 @@
 package bot
 
-import "strings"
+import (
+	"github.com/vanisyd/tgbot/tgapi"
+	"strings"
+)
+
+var CurrentMSG tgapi.Message
 
 func GetCMD(message string) CMD {
 	requestedCmd := strings.Split(message, " ")
