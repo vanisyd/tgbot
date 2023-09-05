@@ -9,30 +9,41 @@ import (
 	"net/http"
 )
 
-func GetGeo(location string) Geolocation {
-	url := buildUrl(ActionGeolocation{
+func GetGeo(location string) (locations []Geolocation) {
+	fetchData(ActionGeolocation{
 		Query: location,
-	})
+	}, &locations)
 
+	return
+}
+
+func GetWeather(location Geolocation) (weather Weather) {
+	fetchData(ActionWeather{
+		Lon: location.Lon,
+		Lat: location.Lat,
+	}, &weather)
+
+	return
+}
+
+func buildUrl(action Action) string {
+	return fmt.Sprintf("%s%s&appid=%s", BaseUrl, action.GetQuery(), environment.Env.WeatherApiToken)
+}
+
+func fetchData(action Action, dest any) {
+	url := buildUrl(action)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+	body, readErr := io.ReadAll(resp.Body)
+	if readErr != nil {
 		log.Fatal(err)
 	}
 
-	var locations []Geolocation
-	err = json.Unmarshal(body, &locations)
+	err = json.Unmarshal(body, dest)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return locations[0]
-}
-
-func buildUrl(action Action) string {
-	return fmt.Sprintf("%s%s&appid=%s", BaseUrl, action.GetQuery(), environment.Env.WeatherApiToken)
 }

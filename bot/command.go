@@ -16,8 +16,15 @@ func Now([]string) string {
 
 func Weather(params []string) string {
 	if len(params) > 0 {
-		location := weather.GetGeo(params[0])
-		fmt.Println(location)
+		locations := weather.GetGeo(params[0])
+		if len(locations) > 0 {
+			location := locations[0]
+			data := weather.GetWeather(location)
+			return fmt.Sprintf("У місті %s зараз %.1f°C", location.LocalNames["uk"], data.Current.Temp)
+		} else {
+			return "Погоду не знайдено"
+		}
 	}
-	return "Погода"
+
+	return CurrentCMD.Signature()
 }

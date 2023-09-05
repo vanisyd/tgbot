@@ -11,7 +11,8 @@ var Commands []CMD = []CMD{
 		Handler: Now,
 	},
 	CMD{
-		Command: CMDWeather,
-		Handler: Weather,
+		Command:    CMDWeather,
+		Parameters: []string{"region"},
+		Handler:    Weather,
 	},
 }

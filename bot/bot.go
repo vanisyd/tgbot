@@ -6,11 +6,13 @@ import (
 )
 
 var CurrentMSG tgapi.Message
+var CurrentCMD CMD
 
 func GetCMD(message string) CMD {
 	requestedCmd := strings.Split(message, " ")
 	for _, command := range Commands {
 		if command.Command == requestedCmd[0] {
+			CurrentCMD = command
 			return command
 		}
 	}
