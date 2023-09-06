@@ -6,7 +6,10 @@ import (
 	"github.com/vanisyd/tgbot/environment"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
+	"os"
+	"strings"
 )
 
 func GetGeo(location string) (locations []Geolocation) {
@@ -24,6 +27,17 @@ func GetWeather(location Geolocation) (weather Weather) {
 	}, &weather)
 
 	return
+}
+
+func GenerateProverb() string {
+	file, err := os.ReadFile("sentences.source")
+	if err != nil {
+		log.Fatal(err)
+	}
+	proverbs := strings.Split(string(file), "\n")
+	line := rand.Intn(len(proverbs))
+
+	return proverbs[line]
 }
 
 func buildUrl(action Action) string {

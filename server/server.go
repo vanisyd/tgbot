@@ -19,10 +19,14 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 	bot.CurrentMSG = body.Message
 
-	if body.Message.Text[0] == '/' {
-		command := bot.GetCMD(body.Message.Text)
-		response := command.Handler(bot.GetParams(body.Message.Text))
-		sendMsg(body.Message.Chat.ID, response)
+	if len(body.Message.Text) > 0 && body.Message.Text[0] == '/' {
+		command, err := bot.GetCMD(body.Message.Text)
+		if err != nil {
+			sendMsg(body.Message.Chat.ID, "Неправильна команда")
+		} else {
+			response := command.Handler(bot.GetParams(body.Message.Text))
+			sendMsg(body.Message.Chat.ID, response)
+		}
 	} else {
 		Welcome(body.Message.Chat.ID, body.Message.From)
 	}

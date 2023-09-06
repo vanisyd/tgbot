@@ -20,9 +20,19 @@ func Weather(params []string) string {
 		if len(locations) > 0 {
 			location := locations[0]
 			data := weather.GetWeather(location)
-			return fmt.Sprintf("У місті %s зараз %.1f°C", location.LocalNames["uk"], data.Current.Temp)
+			locationName, ok := location.LocalNames["uk"]
+			if ok {
+				return fmt.Sprintf("У місті %s зараз %.1f°C", locationName, data.Current.Temp)
+			} else {
+				locationName, ok := location.LocalNames["en"]
+				if ok {
+					return fmt.Sprintf("У місті %s зараз %.1f°C", locationName, data.Current.Temp)
+				} else {
+					return weather.GenerateProverb()
+				}
+			}
 		} else {
-			return "Погоду не знайдено"
+			return weather.GenerateProverb()
 		}
 	}
 
