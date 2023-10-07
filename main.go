@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/vanisyd/tgbot/bootstrap"
 	"github.com/vanisyd/tgbot/server"
 	"log"
@@ -15,5 +14,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Server is ready")
 }

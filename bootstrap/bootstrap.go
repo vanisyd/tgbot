@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"github.com/vanisyd/tgbot/database"
 	"github.com/vanisyd/tgbot/environment"
 	"github.com/vanisyd/tgbot/tgapi"
 	"golang.ngrok.com/ngrok"
@@ -13,6 +14,7 @@ import (
 
 func Init() ngrok.Tunnel {
 	environment.Init()
+	database.Init()
 	return runServer(context.Background())
 }
 
