@@ -22,20 +22,26 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	if len(body.Message.Text) > 0 && body.Message.Text[0] == '/' {
 		command, err := bot.GetCMD(body.Message.Text)
 		if err != nil {
-			sendMsg(body.Message.Chat.ID, "Неправильна команда")
+			sendMsg(body.Message.Chat.ID, "Неправильна команда", nil)
 		} else {
-			response := command.Handler(bot.GetParams(body.Message.Text))
-			sendMsg(body.Message.Chat.ID, response)
+			response, markup := command.Handler(bot.GetParams(body.Message.Text))
+			sendMsg(body.Message.Chat.ID, response, markup)
 		}
 	} else {
 		Welcome(body.Message.Chat.ID, body.Message.From)
 	}
 }
 
-func sendMsg(chatID int64, message string) {
+func sendMsg(chatID int64, message string, markup interface{}) { // TODO: refactor methods
 	body := RequestBody{
 		ChatID: chatID,
 		Text:   message,
+	}
+
+	if markup != nil {
+		body.ReplyMarkup = ReplyMarkupData{
+			InlineKeyboard: markup,
+		}
 	}
 
 	reqBytes, err := json.Marshal(body)
@@ -49,10 +55,15 @@ func sendMsg(chatID int64, message string) {
 		log.Fatal(err)
 	}
 	if res.StatusCode != http.StatusOK {
-		log.Fatal("Unexpected status", res.Status)
+		var errMsg interface{}
+		if err = json.NewDecoder(res.Body).Decode(&errMsg); err != nil {
+			log.Fatal(err)
+		}
+		log.Fatal(errMsg)
+		//log.Fatal("Unexpected status", res.Status)
 	}
 }
 
 func Welcome(chatID int64, user tgapi.User) {
-	sendMsg(chatID, fmt.Sprintf("Hi, %s! Welcome to my bot", user.Username))
+	sendMsg(chatID, fmt.Sprintf("Hi, %s! Welcome to my bot", user.Username), nil)
 }

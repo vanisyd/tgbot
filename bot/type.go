@@ -1,11 +1,13 @@
 package bot
 
-import "strings"
+import (
+	"strings"
+)
 
 type CMD struct {
 	Command    string
 	Parameters []string
-	Handler    func([]string) string
+	Handler    func([]string) (string, interface{})
 }
 
 func (cmd CMD) Signature() (signature string) {

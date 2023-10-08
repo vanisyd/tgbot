@@ -15,3 +15,12 @@ type User struct {
 type Chat struct {
 	ID int64 `json:"id"`
 }
+
+type InlineKeyboardButton struct {
+	Text   string     `json:"text"`
+	WebApp WebAppInfo `json:"web_app"`
+}
+
+type WebAppInfo struct {
+	URL string `json:"url"`
+}
