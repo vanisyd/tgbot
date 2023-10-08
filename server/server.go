@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func Handler(res http.ResponseWriter, req *http.Request) {
+func Handler(_ http.ResponseWriter, req *http.Request) {
 	body := tgapi.ResponseBody{}
 	if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
 		fmt.Println("[JSON]", err)
