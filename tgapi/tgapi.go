@@ -14,6 +14,10 @@ func SendMessage() string {
 	return BuildURL(RouteSendMsg)
 }
 
+func SetMenuButton() string {
+	return BuildURL(RouteSetMenuButton)
+}
+
 func BuildURL(action string) string {
 	return fmt.Sprintf("%s%s/%s", config.BaseUrl, GetToken(), action)
 }

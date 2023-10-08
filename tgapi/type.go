@@ -1,5 +1,24 @@
 package tgapi
 
+type ResponseBody struct {
+	Message Message `json:"message"`
+}
+
+type SendMessageBody struct {
+	ChatID      int64       `json:"chat_id"`
+	Text        string      `json:"text"`
+	ReplyMarkup interface{} `json:"reply_markup,omitempty"`
+}
+
+type SetChatMenuButtonBody struct {
+	ChatID     int64       `json:"chat_id"`
+	MenuButton interface{} `json:"menu_button"`
+}
+
+type ReplyMarkupData struct {
+	InlineKeyboard interface{} `json:"inline_keyboard,omitempty"`
+}
+
 type Message struct {
 	Text string `json:"text"`
 	From User   `json:"from"`
@@ -23,4 +42,10 @@ type InlineKeyboardButton struct {
 
 type WebAppInfo struct {
 	URL string `json:"url"`
+}
+
+type MenuButtonWebApp struct {
+	Type   string     `json:"type"`
+	Text   string     `json:"text"`
+	WebApp WebAppInfo `json:"web_app"`
 }

@@ -21,7 +21,7 @@ func Weather(params []string) (string, interface{}) {
 	if len(params) > 0 {
 		locations := weather.GetGeo(params[0])
 		if len(locations) > 0 {
-			user := database.FindUser(CurrentMSG.From.ID)
+			user := GetCurrentDBUser()
 			database.AddAction(database.Action{
 				UserId: user.ID,
 				Data:   locations,
@@ -29,12 +29,14 @@ func Weather(params []string) (string, interface{}) {
 
 			if len(locations) > 1 {
 				markup := [][]tgapi.InlineKeyboardButton{
-					{tgapi.InlineKeyboardButton{
-						Text: "Open webapp",
-						WebApp: tgapi.WebAppInfo{
-							URL: "https://tg-webapp.local:5173/",
+					{
+						tgapi.InlineKeyboardButton{
+							Text: "Відкрити список",
+							WebApp: tgapi.WebAppInfo{
+								URL: BuildWebAppURL(OptionsRoute),
+							},
 						},
-					}},
+					},
 				}
 
 				return "Виберіть один із варіантів", markup

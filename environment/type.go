@@ -6,4 +6,5 @@ type EnvVars struct {
 	WeatherApiToken string
 	DBUri           string
 	DBName          string
+	WebAppURL       string
 }

@@ -20,4 +20,5 @@ func Init() {
 	Env.WeatherApiToken = os.Getenv("WEATHER_API_KEY")
 	Env.DBUri = os.Getenv("MONGODB_URI")
 	Env.DBName = os.Getenv("MONGODB_DB_NAME")
+	Env.WebAppURL = os.Getenv("WEBAPP_URL")
 }

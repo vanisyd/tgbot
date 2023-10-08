@@ -11,13 +11,15 @@ import (
 )
 
 func Handler(res http.ResponseWriter, req *http.Request) {
-	body := ResponseBody{}
+	body := tgapi.ResponseBody{}
 	if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
 		fmt.Println("[JSON]", err)
 		return
 	}
 
 	bot.CurrentMSG = body.Message
+
+	setMenuBtn(body.Message.Chat.ID)
 
 	if len(body.Message.Text) > 0 && body.Message.Text[0] == '/' {
 		command, err := bot.GetCMD(body.Message.Text)
@@ -32,25 +34,44 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func sendMsg(chatID int64, message string, markup interface{}) { // TODO: refactor methods
-	body := RequestBody{
+func sendMsg(chatID int64, message string, markup interface{}) { // TODO: refactor method
+	body := tgapi.SendMessageBody{
 		ChatID: chatID,
 		Text:   message,
 	}
 
 	if markup != nil {
-		body.ReplyMarkup = ReplyMarkupData{
+		body.ReplyMarkup = tgapi.ReplyMarkupData{
 			InlineKeyboard: markup,
 		}
 	}
 
-	reqBytes, err := json.Marshal(body)
+	sendRequest(body, tgapi.SendMessage())
+}
+
+func setMenuBtn(chatID int64) {
+	body := tgapi.SetChatMenuButtonBody{
+		ChatID: chatID,
+		MenuButton: tgapi.MenuButtonWebApp{
+			Type: tgapi.MenuButtonTypeWebApp,
+			Text: "Shop",
+			WebApp: tgapi.WebAppInfo{
+				URL: bot.BuildWebAppURL(bot.MenuButtonRoute),
+			},
+		},
+	}
+
+	sendRequest(body, tgapi.SetMenuButton())
+}
+
+func sendRequest(reqBody any, action string) {
+	reqBytes, err := json.Marshal(reqBody)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Send message")
-	res, err := http.Post(tgapi.SendMessage(), "application/json", bytes.NewBuffer(reqBytes))
+	fmt.Printf("Request sent: %s", action)
+	res, err := http.Post(action, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +81,6 @@ func sendMsg(chatID int64, message string, markup interface{}) { // TODO: refact
 			log.Fatal(err)
 		}
 		log.Fatal(errMsg)
-		//log.Fatal("Unexpected status", res.Status)
 	}
 }
 
