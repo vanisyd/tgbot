@@ -25,7 +25,7 @@ func BuildWebAppURL(route string) string {
 		}
 		routeUrl = routeUrl + "?"
 	}
-	routeUrl = fmt.Sprintf("%suser_id=%s", routeUrl, user.ID.String())
+	routeUrl = fmt.Sprintf("%suser_id=%s", routeUrl, user.ID.Hex())
 
 	return fmt.Sprintf("%s%s", environment.Env.WebAppURL, routeUrl)
 }

@@ -34,7 +34,7 @@ func Handler(_ http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func sendMsg(chatID int64, message string, markup interface{}) { // TODO: refactor method
+func sendMsg(chatID int64, message string, markup interface{}) {
 	body := tgapi.SendMessageBody{
 		ChatID: chatID,
 		Text:   message,

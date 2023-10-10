@@ -34,9 +34,10 @@ func GetCurrentDBUser() database.User {
 		if user == (database.User{}) {
 			uid := database.AddUser(database.User{TgID: CurrentMSG.From.ID})
 			if userObjId, ok := uid.(primitive.ObjectID); ok {
-				CurrentDBUser = database.GetUser(userObjId)
+				user = database.GetUser(userObjId)
 			}
 		}
+		CurrentDBUser = user
 	}
 
 	return CurrentDBUser
