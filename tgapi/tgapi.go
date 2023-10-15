@@ -6,20 +6,26 @@ import (
 	"github.com/vanisyd/tgbot/environment"
 )
 
-func SetWebHook() string {
-	return BuildURL(RouteSetWebHook)
+// TODO: refactor duplicating code
+
+func SetWebHookWithToken(token string) string {
+	return BuildURLWithToken(RouteSetWebHook, token)
 }
 
-func SendMessage() string {
-	return BuildURL(RouteSendMsg)
+func SendMessage(token string) string {
+	return BuildURLWithToken(RouteSendMsg, token)
 }
 
-func SetMenuButton() string {
-	return BuildURL(RouteSetMenuButton)
+func SetMenuButton(token string) string {
+	return BuildURLWithToken(RouteSetMenuButton, token)
 }
 
 func BuildURL(action string) string {
 	return fmt.Sprintf("%s%s/%s", config.BaseUrl, GetToken(), action)
+}
+
+func BuildURLWithToken(action string, token string) string {
+	return fmt.Sprintf("%s%s/%s", config.BaseUrl, token, action)
 }
 
 func GetToken() string {

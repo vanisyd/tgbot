@@ -1,17 +1,7 @@
 package main
 
-import (
-	"github.com/vanisyd/tgbot/bootstrap"
-	"github.com/vanisyd/tgbot/server"
-	"log"
-	"net/http"
-)
+import "github.com/vanisyd/tgbot/bootstrap"
 
 func main() {
-	tunnel := bootstrap.Init()
-
-	err := http.Serve(tunnel, http.HandlerFunc(server.Handler))
-	if err != nil {
-		log.Fatal(err)
-	}
+	bootstrap.Init()
 }

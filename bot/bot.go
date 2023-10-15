@@ -31,13 +31,16 @@ func GetParams(message string) []string {
 func GetCurrentDBUser() database.User {
 	if CurrentDBUser == (database.User{}) {
 		user := database.FindUser(CurrentMSG.From.ID)
-		if user == (database.User{}) {
+		if _, ok := user.(database.User); !ok {
 			uid := database.AddUser(database.User{TgID: CurrentMSG.From.ID})
 			if userObjId, ok := uid.(primitive.ObjectID); ok {
 				user = database.GetUser(userObjId)
 			}
 		}
-		CurrentDBUser = user
+
+		if userObj, ok := user.(database.User); ok {
+			CurrentDBUser = userObj
+		}
 	}
 
 	return CurrentDBUser

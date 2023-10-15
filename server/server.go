@@ -2,35 +2,74 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	database "github.com/vanisyd/tgbot-db"
 	"github.com/vanisyd/tgbot/bot"
+	"github.com/vanisyd/tgbot/environment"
+	"github.com/vanisyd/tgbot/server/api"
 	"github.com/vanisyd/tgbot/tgapi"
+	"golang.ngrok.com/ngrok"
+	"golang.ngrok.com/ngrok/config"
 	"log"
 	"net/http"
 )
 
-func Handler(_ http.ResponseWriter, req *http.Request) {
-	body := tgapi.ResponseBody{}
-	if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
-		fmt.Println("[JSON]", err)
-		return
+var Tunnel ngrok.Tunnel
+var CurrentBot database.Bot
+
+func Init() {
+	RunServer(context.Background())
+	api.Init(Tunnel)
+	err := http.Serve(Tunnel, http.HandlerFunc(HttpHandler))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func RunServer(ctx context.Context) ngrok.Tunnel {
+	tunnel, err := ngrok.Listen(ctx, config.HTTPEndpoint(), ngrok.WithAuthtoken(environment.Env.NgrokAuthToken))
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	bot.CurrentMSG = body.Message
+	fmt.Println("Tunnel created:", tunnel.URL())
+	Tunnel = tunnel
 
-	setMenuBtn(body.Message.Chat.ID)
+	return tunnel
+}
 
-	if len(body.Message.Text) > 0 && body.Message.Text[0] == '/' {
-		command, err := bot.GetCMD(body.Message.Text)
-		if err != nil {
-			sendMsg(body.Message.Chat.ID, "Неправильна команда", nil)
+func HttpHandler(_ http.ResponseWriter, req *http.Request) {
+	hashID := req.URL.Query().Get("hash_id")
+	fmt.Printf("Request from %s\n", hashID)
+	dbBot := database.FindBot(hashID)
+	if botObj, ok := dbBot.(database.Bot); ok {
+		CurrentBot = botObj
+
+		body := tgapi.ResponseBody{}
+		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+			fmt.Println("[JSON]", err)
+			return
+		}
+
+		bot.CurrentMSG = body.Message
+
+		setMenuBtn(body.Message.Chat.ID)
+
+		if len(body.Message.Text) > 0 && body.Message.Text[0] == '/' {
+			command, err := bot.GetCMD(body.Message.Text)
+			if err != nil {
+				sendMsg(body.Message.Chat.ID, "Неправильна команда", nil)
+			} else {
+				response, markup := command.Handler(bot.GetParams(body.Message.Text))
+				sendMsg(body.Message.Chat.ID, response, markup)
+			}
 		} else {
-			response, markup := command.Handler(bot.GetParams(body.Message.Text))
-			sendMsg(body.Message.Chat.ID, response, markup)
+			Welcome(body.Message.Chat.ID, body.Message.From)
 		}
 	} else {
-		Welcome(body.Message.Chat.ID, body.Message.From)
+		fmt.Println("Unknown request")
 	}
 }
 
@@ -46,7 +85,7 @@ func sendMsg(chatID int64, message string, markup interface{}) {
 		}
 	}
 
-	sendRequest(body, tgapi.SendMessage())
+	sendRequest(body, tgapi.SendMessage(CurrentBot.Token))
 }
 
 func setMenuBtn(chatID int64) {
@@ -61,7 +100,7 @@ func setMenuBtn(chatID int64) {
 		},
 	}
 
-	sendRequest(body, tgapi.SetMenuButton())
+	sendRequest(body, tgapi.SetMenuButton(CurrentBot.Token))
 }
 
 func sendRequest(reqBody any, action string) {
@@ -70,7 +109,6 @@ func sendRequest(reqBody any, action string) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Request sent: %s", action)
 	res, err := http.Post(action, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		log.Fatal(err)
