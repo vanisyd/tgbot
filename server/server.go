@@ -8,12 +8,12 @@ import (
 	database "github.com/vanisyd/tgbot-db"
 	"github.com/vanisyd/tgbot/bot"
 	"github.com/vanisyd/tgbot/environment"
-	"github.com/vanisyd/tgbot/server/api"
 	"github.com/vanisyd/tgbot/tgapi"
 	"golang.ngrok.com/ngrok"
 	"golang.ngrok.com/ngrok/config"
 	"log"
 	"net/http"
+	"os/exec"
 )
 
 var Tunnel ngrok.Tunnel
@@ -21,7 +21,7 @@ var CurrentBot database.Bot
 
 func Init() {
 	RunServer(context.Background())
-	api.Init(Tunnel)
+	initBots()
 	err := http.Serve(Tunnel, http.HandlerFunc(HttpHandler))
 	if err != nil {
 		log.Fatal(err)
@@ -124,4 +124,25 @@ func sendRequest(reqBody any, action string) {
 
 func Welcome(chatID int64, user tgapi.User) {
 	sendMsg(chatID, fmt.Sprintf("Hi, %s! Welcome to my bot", user.Username), nil)
+}
+
+func InitBot(token string, hashID string) {
+	payload := fmt.Sprintf("url=%s?hash_id=%s", Tunnel.URL(), hashID)
+	cmd := exec.Command("curl", "-F", payload, tgapi.SetWebHookWithToken(token))
+
+	if err := cmd.Run(); err != nil {
+		log.Println("[TCP.Error] " + err.Error())
+		return
+	}
+
+	log.Printf("Bot %s loaded", hashID)
+}
+
+func initBots() {
+	bots := database.GetBots()
+	if botsData, ok := bots.([]database.Bot); ok {
+		for _, botData := range botsData {
+			InitBot(botData.Token, botData.HashID)
+		}
+	}
 }

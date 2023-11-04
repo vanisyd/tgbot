@@ -3,16 +3,12 @@ package api
 import (
 	"bytes"
 	"fmt"
-	"golang.ngrok.com/ngrok"
 	"log"
 	"net"
 	"strings"
 )
 
-var HttpTunnel ngrok.Tunnel
-
-func Init(tunnel ngrok.Tunnel) {
-	HttpTunnel = tunnel
+func Init() {
 	go RunService()
 }
 
@@ -43,7 +39,8 @@ func handleServiceRequest(conn net.Conn) {
 	buffer := make([]byte, 1024)
 	_, err := conn.Read(buffer)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("[TCP.Error] " + err.Error())
+		return
 	}
 	cmdSize := bytes.IndexByte(buffer[:], 0)
 	cmdText := strings.TrimSpace(string(buffer[:cmdSize]))
@@ -62,7 +59,8 @@ func handleServiceRequest(conn net.Conn) {
 			cmd.Handler(arguments)
 			err := conn.Close()
 			if err != nil {
-				log.Fatal(err)
+				log.Println("[TCP.Error] " + err.Error())
+				return
 			}
 		}
 	}
