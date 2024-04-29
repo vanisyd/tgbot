@@ -1,4 +1,4 @@
-package tgapi
+package tgservice
 
 import (
 	"fmt"
@@ -6,18 +6,16 @@ import (
 	"github.com/vanisyd/tgbot/environment"
 )
 
-// TODO: refactor duplicating code
-
 func SetWebHookWithToken(token string) string {
-	return BuildURLWithToken(RouteSetWebHook, token)
+	return BuildURLWithToken(config.RouteSetWebHook, token)
 }
 
 func SendMessage(token string) string {
-	return BuildURLWithToken(RouteSendMsg, token)
+	return BuildURLWithToken(config.RouteSendMsg, token)
 }
 
 func SetMenuButton(token string) string {
-	return BuildURLWithToken(RouteSetMenuButton, token)
+	return BuildURLWithToken(config.RouteSetMenuButton, token)
 }
 
 func BuildURL(action string) string {

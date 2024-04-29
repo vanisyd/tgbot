@@ -4,7 +4,6 @@ import (
 	"fmt"
 	database "github.com/vanisyd/tgbot-db"
 	"github.com/vanisyd/tgbot/module/weather"
-	"github.com/vanisyd/tgbot/tgapi"
 	"time"
 )
 
@@ -26,21 +25,6 @@ func Weather(params []string) (string, interface{}) {
 				UserId: user.ID,
 				Data:   locations,
 			})
-
-			if len(locations) > 1 {
-				markup := [][]tgapi.InlineKeyboardButton{
-					{
-						tgapi.InlineKeyboardButton{
-							Text: "Відкрити список",
-							WebApp: tgapi.WebAppInfo{
-								URL: BuildWebAppURL(OptionsRoute),
-							},
-						},
-					},
-				}
-
-				return "Виберіть один із варіантів", markup
-			}
 
 			location := locations[0]
 			data := weather.GetWeather(location)

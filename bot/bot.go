@@ -2,13 +2,13 @@ package bot
 
 import (
 	"errors"
+	"github.com/vanisyd/tgapi/kind"
 	database "github.com/vanisyd/tgbot-db"
-	"github.com/vanisyd/tgbot/tgapi"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
 )
 
-var CurrentMSG tgapi.Message
+var CurrentMSG kind.Message
 var CurrentCMD CMD
 var CurrentDBUser database.User
 

@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/vanisyd/tgapi/kind"
 	database "github.com/vanisyd/tgbot-db"
 	"github.com/vanisyd/tgbot/bot"
 	"github.com/vanisyd/tgbot/environment"
-	"github.com/vanisyd/tgbot/tgapi"
+	"github.com/vanisyd/tgbot/tgservice"
 	"golang.ngrok.com/ngrok"
 	"golang.ngrok.com/ngrok/config"
 	"log"
@@ -47,20 +48,17 @@ func HttpHandler(_ http.ResponseWriter, req *http.Request) {
 	if botObj, ok := dbBot.(database.Bot); ok {
 		CurrentBot = botObj
 
-		body := tgapi.ResponseBody{}
+		body := kind.ResponseBody{}
 		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
 			fmt.Println("[JSON]", err)
 			return
 		}
 
-		bot.CurrentMSG = body.Message
-
-		setMenuBtn(body.Message.Chat.ID)
-
 		if len(body.Message.Text) > 0 && body.Message.Text[0] == '/' {
 			command, err := bot.GetCMD(body.Message.Text)
 			if err != nil {
-				sendMsg(body.Message.Chat.ID, "Неправильна команда", nil)
+				sendMsg(body.Message.Chat.ID, "Unknown command", nil)
+				log.Printf("[ERROR] Code: 400 Bot hash: %s. Unknown command %s\n", hashID, body.Message.Text)
 			} else {
 				response, markup := command.Handler(bot.GetParams(body.Message.Text))
 				sendMsg(body.Message.Chat.ID, response, markup)
@@ -74,33 +72,33 @@ func HttpHandler(_ http.ResponseWriter, req *http.Request) {
 }
 
 func sendMsg(chatID int64, message string, markup interface{}) {
-	body := tgapi.SendMessageBody{
+	body := kind.SendMessageBody{
 		ChatID: chatID,
 		Text:   message,
 	}
 
 	if markup != nil {
-		body.ReplyMarkup = tgapi.ReplyMarkupData{
+		body.ReplyMarkup = kind.ReplyMarkupData{
 			InlineKeyboard: markup,
 		}
 	}
 
-	sendRequest(body, tgapi.SendMessage(CurrentBot.Token))
+	sendRequest(body, tgservice.SendMessage(CurrentBot.Token))
 }
 
 func setMenuBtn(chatID int64) {
-	body := tgapi.SetChatMenuButtonBody{
+	body := kind.SetChatMenuButtonBody{
 		ChatID: chatID,
-		MenuButton: tgapi.MenuButtonWebApp{
-			Type: tgapi.MenuButtonTypeWebApp,
+		MenuButton: kind.MenuButtonWebApp{
+			Type: kind.MenuButtonTypeWebApp,
 			Text: "Shop",
-			WebApp: tgapi.WebAppInfo{
+			WebApp: kind.WebAppInfo{
 				URL: bot.BuildWebAppURL(bot.MenuButtonRoute),
 			},
 		},
 	}
 
-	sendRequest(body, tgapi.SetMenuButton(CurrentBot.Token))
+	sendRequest(body, tgservice.SetMenuButton(CurrentBot.Token))
 }
 
 func sendRequest(reqBody any, action string) {
@@ -122,13 +120,13 @@ func sendRequest(reqBody any, action string) {
 	}
 }
 
-func Welcome(chatID int64, user tgapi.User) {
+func Welcome(chatID int64, user kind.User) {
 	sendMsg(chatID, fmt.Sprintf("Hi, %s! Welcome to my bot", user.Username), nil)
 }
 
 func InitBot(token string, hashID string) {
 	payload := fmt.Sprintf("url=%s?hash_id=%s", Tunnel.URL(), hashID)
-	cmd := exec.Command("curl", "-F", payload, tgapi.SetWebHookWithToken(token))
+	cmd := exec.Command("curl", "-F", payload, tgservice.SetWebHookWithToken(token))
 
 	if err := cmd.Run(); err != nil {
 		log.Println("[TCP.Error] " + err.Error())

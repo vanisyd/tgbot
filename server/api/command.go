@@ -9,7 +9,7 @@ import (
 func AttachBot(args []string) {
 	token := args[0]
 	hashID := args[1]
-
+	_ = fmt.Sprintf("token %s, hashID: %s", token, hashID)
 	server.InitBot(token, hashID)
 	database.AddBot(database.Bot{
 		Token:  token,
